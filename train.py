@@ -1,13 +1,15 @@
 ### Importation des bibliothèques ###
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import model
 import utils
 
 ### Définition des paramètres ###
-gamma, mu_min, mu_max, nb_points = 10., 0., 30., 301
+gamma, mu_min, mu_max, nb_points = 10., 0., 5., 201
 fts_dim, dim_inter = 64, 32 
-nb_inter = 6
-maxZ = 20
+nb_inter = 5
+maxZ = 18
 
 ### Instanciation du réseau ###
 net = model.BouzidNet(maxZ, gamma, mu_min, mu_max, nb_points, fts_dim, nb_inter, dim_inter)
@@ -33,6 +35,7 @@ best_score = 0.5
 criterion = torch.nn.MSELoss(reduction = "mean")
 optimizer = torch.optim.AdamW(net.parameters(), lr = 1e-3)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, n_epochs, 1e-6, verbose = True)
+list_val_loss = []
 
 ### Training ###
 print("Début de l'entraînement...")
@@ -58,6 +61,7 @@ for epoch in range(1, n_epochs + 1):
 		for X_val, y_val in val_dataloader:
 			outputs = net.forward(X_val)
 			loss_val = torch.sqrt(criterion(outputs,y_val))
+			list_val_loss.append(loss_val.item())
 			print("Validation loss: " + str(loss_val.item()))
 			print("")
     
@@ -67,4 +71,12 @@ for epoch in range(1, n_epochs + 1):
 	### Enregistrement du modèle ###
 	if (loss_val.item() < best_score):
 		best_score = loss_val.item()
-		torch.save(net, 'BouzidNet.pt') 
+		torch.save(net, 'BouzidNet.pt')
+
+### Affichage de l'évolution de la loss ###
+plt.figure()
+plt.title("Evolution de la loss de validation au cours de l'entraînement")
+plt.plot(np.asarray(list_val_loss))
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.savefig('Images/loss_evolution.png')
