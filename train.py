@@ -24,7 +24,7 @@ training_set, val_set = torch.utils.data.random_split(data, [0.8,0.2])
 n_train, n_val = training_set.__len__(), val_set.__len__()
 
 ### Data Loader ###
-train_dataloader = torch.utils.data.DataLoader(data, batch_size = 128, shuffle = True, num_workers = 4)
+train_dataloader = torch.utils.data.DataLoader(training_set, batch_size = 128, shuffle = True, num_workers = 4)
 val_dataloader = torch.utils.data.DataLoader(val_set, batch_size = n_val, shuffle = False, num_workers = 4)
 
 ### Nombre d'epochs et score pour l'enregistrement du modèle ###
